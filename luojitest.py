@@ -103,15 +103,51 @@ class MyWindow(QMainWindow, Ui_MainWindow):
 
 # 根据输入框历史战局详情
      def findxq(self):
-         print('有在执行我1')
          id =self.lineEdit.text()
-         print(id)
          token = text['data']['token']
          headers = {'content-type': "application/json",'x-auth-token': token}
          response = requests.get(url="https://api.shisanshui.rtxux.xyz/history/" +id,
                                   headers=headers)
          text2 = json.loads(response.text)
-         print(text2)
+         status = text2['status']
+         if status == 3001:
+             print('！战局不存在或未结束！')
+             return 0
+         elif status == 3002:
+             print('！玩家不存在！')
+
+         text3 = text2['data']['detail']
+         print(text3)
+         array = text3
+         strid = []
+         strname = []
+         strscore = []
+         strcard = []
+         for i in array:
+             strid.append(i['player_id'])
+             strname.append(i['name'])
+             strscore.append(i['score'])
+             strcard.append(i['card'])
+
+         self.tableWidget_2.setColumnCount(4)
+         self.tableWidget_2.setRowCount(4)
+         str2 = ('id', 'name', 'score', 'card')
+         self.tableWidget_2.setHorizontalHeaderLabels(str2)
+         self.tableWidget_2.setColumnWidth(0,50)
+         self.tableWidget_2.setColumnWidth(1,100)
+         self.tableWidget_2.setColumnWidth(2,70)
+         self.tableWidget_2.setColumnWidth(3,500)
+
+         for i in range(4):
+            newitem1 = QTableWidgetItem("%d" % strid[i])
+            newitem2 = QTableWidgetItem(strname[i])
+            newitem3 = QTableWidgetItem("%d" % strscore[i])
+            newitem4 = QTableWidgetItem("%s" % strcard[i])
+
+            self.tableWidget_2.setItem(i, 0, newitem1)
+            self.tableWidget_2.setItem(i, 1, newitem2)
+            self.tableWidget_2.setItem(i, 2, newitem3)
+            self.tableWidget_2.setItem(i, 3, newitem4)
 
 # 历史战局列表
      def xxjl(self):
@@ -119,7 +155,7 @@ class MyWindow(QMainWindow, Ui_MainWindow):
          id = text['data']['user_id']
          conn = http.client.HTTPSConnection("api.shisanshui.rtxux.xyz")
          headers = {'x-auth-token': token}
-         conn.request("GET", "/history?page=1&limit=5&player_id=%d" %id, headers=headers)
+         conn.request("GET", "/history?page=1&limit=20&player_id=%d" %id, headers=headers)
          res = conn.getresponse()
          data = res.read()
 
